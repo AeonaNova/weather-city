@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Статистика поисков</title>
+</head>
+<body>
+    <nav class="flex justify-between text-3xl my-3">
+        <ul class="flex ml-10">
+            <li>Статистика поисков</li>
+        </ul>
+    </nav>
+    <hr>
+    <div class="flex justify-center flex-col items-center" id="content">
+        <ul class="my-10">
+            {% for name, val in data.items() %}
+                <li class="page-item my-2">
+                    <span class="font-semibold">Город:</span> {{ name }},
+                    <span class="font-semibold">количество поисков:</span> {{ val }}
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="/" class="border-2 rounded-2xl bg-gray-300 p-2 mt-5">Вернуться на главную</a>
+    </div>
+</body>
+</html>

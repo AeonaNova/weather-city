@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Погода</title>
+</head>
+<body>
+    <nav class="flex justify-between text-3xl my-3">
+        <ul class="flex ml-10">
+            <li>Получить погоду в городе</li>
+        </ul>
+        {% if last_search %}
+            <ul class="flex gap-5 mr-10">
+                <li>Последний поиск: г.</li>
+                <li>{{ last_search }}</li>
+            </ul>
+        {% endif %}
+    </nav>
+
+    <hr>
+    <div class="flex justify-center flex-col items-center" id="content">
+        <div class="flex my-10 gap-5">
+            {% if error %}
+                <div class="error-message" style="color: red; text-align: center;">
+                    {{ error }}
+                </div>
+            {% endif %}
+            <form method="post" onsubmit="return validateForm()">
+                <input type="text" id="city-input" name="city" placeholder="Введите город" autocomplete="off" style="border: 5px solid #37c2a9;" required>
+                    <ul class="flex ml-30" id="city-suggestions" >
+                    </ul>
+                <hr>
+                <div class="flex my-10 gap-5">
+                    <button class="border-2 rounded-2xl bg-gray-300 p-3" type="submit">Получить погоду</button>
+                </div>
+                <div class="flex my-10 gap-5">
+                    <ul class="flex mr-10">
+                        <li><a href="/api/search-stats" class="border-2 rounded-2xl bg-gray-300 p-2">Статистика поисков</a></li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    var timeout = null;
+
+    $('#city-input').on('input', function() {
+        var query = $(this).val().trim();
+
+        // Clear previous timeouts to avoid unnecessary requests
+        if (timeout) clearTimeout(timeout);
+
+        if (query.length > 0) {
+            timeout = setTimeout(function() {
+                $.get('/cities/', { q: query }, function(data) {
+                    var suggestions = data.cities;
+                    var suggestionsHtml = '';
+                    // Start with an empty UL
+                    suggestionsHtml += '<ul>';
+                    for (var i = 0; i < suggestions.length; i++) {
+                        // Wrap each city in an LI tag
+                        suggestionsHtml += '<li>' + suggestions[i] + '</li>';
+                    }
+                    // Close the UL tag
+                    suggestionsHtml += '</ul>';
+                    // Now apply this HTML structure to your suggestions box
+                    $('#city-suggestions').html(suggestionsHtml).show();
+                });
+            }, 300);
+        } else {
+            $('#city-suggestions').empty().hide();
+        }
+    });
+
+    // Selecting a suggestion
+    $('#city-suggestions').on('click', 'li', function() {
+        var selectedCity = $(this).text();
+        $('#city-input').val(selectedCity);
+        $('#city-suggestions').empty().hide();
+    });
+});
+</script>
+<script>
+function validateForm() {
+    var city = document.getElementById("city-input").value;
+    if (city.trim() == "") {
+        alert("Пожалуйста, введите название города.");
+        return false;
+    }
+    return true;
+}
+</script>
+</html>
